@@ -29,30 +29,31 @@ fi
 
 ## Report
 FILES=$(find $folder -name "*.fasta" -or -name "*.fa" )
-
-if [[ $(echo $FILES|wc -l) -gt 0 ]]
+NFILES=$(echo $FILES| wc -w)
+if [[ $NFILES -gt 0 ]]
 then 
-	echo "There are $(echo $FILES|wc -l) fasta or fa files."  ## 1 file?
+	echo "There are $NFILES fasta or fa files in $folder."  ## 1 file?
 	
-	IDtotal=$(cat $FILES | awk '/^>/{print $1}'| sort | uniq -c | wc -l)
-	echo " There are $IDtotal unique fasta IDs"
+	IDtotal=$(awk '/^>/{print $1}' $FILES| sort | uniq -c | wc -l)
+	echo "There are $IDtotal unique fasta IDs"
 	
 	for i in $FILES
 	do 
-		echo "------------------$i------------------"
-		if [[ -l $i ]]
+		echo "=========$i========="
+		if [[ -L "$i" ]]
 		then
 			echo "Symlink: Yes"
 		else
 			echo "Symlink: No"
 		fi
 		echo "Number of sequences: $(awk '/^>/{print $1}' $i| wc -l)"
-		echo "Total sequence length: $(awk '!/>/{gsub(/-/, "", $0); print length($0)}' $i | awk '{x=x+$1;print x}'| tail -n 1)"	
+		echo "Total sequence length: $(awk '!/>/{gsub(/-/, "", $0);gsub(" ", "", $0); total_length += length($0)} END {print total_length}' $i)"
+		echo	
 	done
 	
 	
 else
-	echo "There are 0 fasta or fa files."
+	echo "There are 0 fasta or fa files in $folder."
 fi
 
 
