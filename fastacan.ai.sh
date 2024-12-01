@@ -2,9 +2,9 @@
 
 
 ## fastacan.ai.sh
-## Improvements made:
-# Added the possibility of finding an empty or incorrectly formated fa or fasta file (number of sequences is 0).
-# Quoted variables which store filenames or filepaths, so that if they contain spaces they are handled correctly. Ex: $1, $folder and $i
+# Improvements made:
+# Added the possibility of finding an empty or incorrectly formatted fa or fasta file (number of sequences is 0).
+# Quoted variables which store filenames or file paths, so that if they contain spaces they are handled correctly. Ex: $1, $folder and $i
 # Made report title and file headers of equal length, regardless of the length of the folder name or file name.
 
 
@@ -33,19 +33,19 @@ else
 fi
 
 
-## REPORT
+### REPORT ###
 
-# Important variables:
+## Important variables:
 FILES=$(find "$folder" -name "*.fasta" -or -name "*.fa" ) # finds fasta or fa files in folder and sub-folders,
 							# and stores them in $FILES (in a single line)
 N_FILES=$(echo $FILES| wc -w) # counts how many files it has found. If $FILES is empty the output will be 0.
 
-# Improved readability in report:
+## Improved readability in the report:
 if [[ $folder == . ]] # if $folder is a . 
 then folder="the current folder" # changes it to "the current folder" improving readability in the report
 fi
 
-# Title:
+## Title:
 echo # new_line
 # To obtain a report title with length 100 regardless of the length of the folder name:
 header_length=100 # total title length
@@ -120,8 +120,9 @@ then
 		echo "Total sequence length: $T_SEQ_L"
 		
 		## Sequences content: nucleotide or amino acids
-		ACTG_counts=$(awk '!/>/{gsub(/-/, "", $0); print $0}' "$i" | grep -o '[actgACTG]' | wc -l) # finds the lines with no >, deletes -, and from those
+		ACTG_counts=$(awk '!/>/{gsub(/-/, "", $0); print $0}' "$i" | grep -o '[actgACTG]' | wc -l) # finds lines with no >, deletes -, and from those
 										# lines greps the letters actg (case insensitive) and counts how many there are
+		
 		TOTAL_counts=$(awk '!/>/{gsub(/-/, "", $0); print $0}' "$i" | grep -o '[^ ]' | wc -l) # finds the lines with no >, deletes -, and from those
 										# lines greps all the characters except spaces and counts how many there are
 		
