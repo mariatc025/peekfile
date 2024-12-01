@@ -71,22 +71,18 @@ then
 		# Sequences content: nucleotide or amino acids
 		ACTG_counts=$(awk '!/>/{gsub(/-/, "", $0); print $0}' $i | grep -o '[actgACTG]' | wc -l) # finds the lines with no >, replaces -, and from those lines greps the letters actg (case insensitive) and counts how many there are
 		TOTAL_counts=$(awk '!/>/{gsub(/-/, "", $0); print $0}' $i | grep -o '[^ ]' | wc -l) # finds the lines with no >, replaces -, and from those lines greps all the characters except spaces and counts how many there are
-		if [[ ACTG_counts -gt 0 ]] 
+		ACTG_freq=$(( ($ACTG_counts*100) / $TOTAL_counts )) # calculates the frequency of ACTG in the sequence
+								    # multiplies first because this expansion is integer only and changing the order we would always get 0
+		if [[ $ACTG_freq -gt 70 ]] # if the frequency is greater than 70 they are nucleotides. Protein sequences usually have ACTG with a frequency less than 50%
+					   # we don't put 100% because there is the possibility of other IUPAC characters such as N.
 		then
-			ACTG_freq=$(( ($ACTG_counts*100) / $TOTAL_counts )) # calculates the frequency of ACTG in the sequence
-									    # multiplies first because this expansion is integer only and changing the order we would always get 0
-			if [[ $ACTG_freq -gt 70 ]] # if the frequency is greater than 70 they are nucleotides. Protein sequences usually have ACTG with a frequency less than 50%
-						   # we don't put 100% because there is the possibility of other IUPAC characters such as N.
-			then
-				echo "Sequences content: nucleotides"
-			else
-				echo "Sequences content: amino acids"
-			fi
+			echo "Sequences content: nucleotides"
 		else
 			echo "Sequences content: amino acids"
 		fi
 		
-		# 
+				
+		# Prints the file or the begining and ending, only if arg2 is not 0
 		FILE_lines=$(cat $i | wc -l) # counts number of lines in the file
 		if [[ $N != 0 ]] # only done if arg2 is not 0
 		then
