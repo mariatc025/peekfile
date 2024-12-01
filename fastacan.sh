@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+## fastacan.sh
+
 ## Argument 1 check
 if [[ -z $1 ]]  # check if $1 is empty
 then
@@ -24,16 +26,19 @@ else
 	exit 1     # else print the error message and exit the program
 fi
 
+### REPORT ###
 
-## REPORT
+## Important variables:
 FILES=$(find $folder -name "*.fasta" -or -name "*.fa" ) # finds fasta or fa files in folder and sub-folders,
 							# and stores them in $FILES (in a single line)
-N_FILES=$(echo $FILES| wc -w) # counts how many files it has found
+N_FILES=$(echo $FILES| wc -w) # counts how many files it has found. If $FILES is empty the output will be 0.
 
+## Improved readability in the report:
 if [[ $folder == . ]] # if $folder is a . 
 then folder="the current folder" # changes it to "the current folder" improving readability in the report
 fi
 
+## Title:
 echo # new_line
 echo "###########  FASTA/FA files in $folder REPORT  ###########" # title of the report
 echo # new_line
@@ -53,16 +58,15 @@ then
 	then echo "There is $ID_total unique fasta ID." # not likely, but prints this when there is only one unique fasta ID
 	else echo "There are $ID_total unique fasta IDs."
 	fi
-	
 	echo # new_line
 	
-	## for each file
+	# for each file
 	for i in $FILES
 	do 
-		# filename
+		## Filename Header
 		echo "========= $i ========="
 		
-		# If the file is a symlink or not
+		## Is the file a symlink or not
 		if [[ -L "$i" ]] 
 		then
 			echo "Type symlink: Yes"
@@ -70,18 +74,27 @@ then
 			echo "Type symlink: No"
 		fi
 		
-		# Number of sequences per file
+		## Number of sequences per file
 		N_SEQ=$(awk '/^>/{print $1}' $i | wc -l) # prints the IDs of the file and counts them and stores it in $N_SEQ
-		echo "Number of sequences: $N_SEQ"
 		
-		# Total sequence length per file, without -," " and \n
+		if [[ $N_SEQ -eq 0 ]] # checks if the N_SEQ equals 0
+		then 
+			echo "Number of sequences: 0"
+			echo # new_line
+			continue # skips this file
+		else
+			echo "Number of sequences: $N_SEQ"
+		fi
+		
+		## Total sequence length per file, without -," " and \n
 		T_SEQ_L=$(awk '!/>/{gsub(/-/, "", $0); gsub(" ", "", $0); total_length += length($0)} END {print total_length}' $i) 
 		# finds the lines with no >, deletes - and spaces, counts the length per line and adds it to total length, which is stored in $T_SEQ_L
 		echo "Total sequence length: $T_SEQ_L"
 		
-		# Sequences content: nucleotide or amino acids
+		## Sequences content: nucleotide or amino acids
 		ACTG_counts=$(awk '!/>/{gsub(/-/, "", $0); print $0}' $i | grep -o '[actgACTG]' | wc -l) # finds the lines with no >, deletes -, and from those
 										# lines greps the letters actg (case insensitive) and counts how many there are
+		
 		TOTAL_counts=$(awk '!/>/{gsub(/-/, "", $0); print $0}' $i | grep -o '[^ ]' | wc -l) # finds the lines with no >, deletes -, and from those
 										# lines greps all the characters except spaces and counts how many there are
 		
@@ -97,7 +110,7 @@ then
 		fi
 		
 				
-		# Prints the file or the beginning and ending, only if arg2 is not 0
+		## Prints the full file or the beginning and ending, only if arg2 is not 0
 		FILE_lines=$(cat $i | wc -l) # counts number of lines in the file
 		if [[ $N != 0 ]] # only done if arg2 is not 0
 		then
